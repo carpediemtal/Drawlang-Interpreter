@@ -5,6 +5,9 @@ public class Token {
     private String string;
     private double val;
 
+    public Token() {
+
+    }
     public Token(TokenType tokenType, String string, double val) {
         this.tokenType = tokenType;
         this.string = string;
