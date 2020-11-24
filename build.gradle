@@ -22,3 +22,7 @@ javafx {
 application {
     mainClass = 'eternal.fire.Draw'
 }
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}

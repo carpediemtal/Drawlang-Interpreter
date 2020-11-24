@@ -15,7 +15,7 @@ public class Read {
             }
             // End of File
             sb.append("!");
-            return sb.toString();
+            return sb.toString().toUpperCase();
         }
     }
 }
