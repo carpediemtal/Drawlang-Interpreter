@@ -4,8 +4,8 @@ import java.util.Objects;
 
 public class Token {
     private TokenType tokenType;
-    private String string;
-    private double val;
+    private String tokenString;
+    private double tokenVal;
 
     public Token() {
 
@@ -13,7 +13,7 @@ public class Token {
 
     @Override
     public int hashCode() {
-        return Objects.hash(tokenType, string, val);
+        return Objects.hash(tokenType, tokenString, tokenVal);
     }
 
     @Override
@@ -27,13 +27,13 @@ public class Token {
             return false;
         }
         Token token = (Token) obj;
-        return token.getString().equals(this.string) && token.getTokenType() == this.tokenType && token.val == this.val;
+        return token.getTokenString().equals(this.tokenString) && token.getTokenType() == this.tokenType && token.tokenVal == this.tokenVal;
     }
 
-    public Token(TokenType tokenType, String string, double val) {
+    public Token(TokenType tokenType, String tokenString, double tokenVal) {
         this.tokenType = tokenType;
-        this.string = string;
-        this.val = val;
+        this.tokenString = tokenString;
+        this.tokenVal = tokenVal;
     }
 
     public TokenType getTokenType() {
@@ -44,19 +44,25 @@ public class Token {
         this.tokenType = tokenType;
     }
 
-    public String getString() {
-        return string;
+    public String getTokenString() {
+        return tokenString;
     }
 
-    public void setString(String string) {
-        this.string = string;
+    public void setTokenString(String tokenString) {
+        this.tokenString = tokenString;
     }
 
-    public double getVal() {
-        return val;
+    public double getTokenVal() {
+        return tokenVal;
     }
 
-    public void setVal(double val) {
-        this.val = val;
+    public void setTokenVal(double tokenVal) {
+        this.tokenVal = tokenVal;
     }
+
+    @Override
+    public String toString() {
+        return String.format("TokenType:%s;\tTokenString:%s;\tTokenVal:%.2f\t\n", tokenType, tokenString, tokenVal);
+    }
+
 }

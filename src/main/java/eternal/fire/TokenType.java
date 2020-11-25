@@ -5,6 +5,6 @@ public enum TokenType {
     T, SEMICOLON, L_BRACKET, R_BRACKET, COMMA,
     PLUS, MINUS, MUL, DIV, POWER,
     FUNC,
-    CONST_ID,
+    CONST_VAL,
     END, ERROR;
 }
