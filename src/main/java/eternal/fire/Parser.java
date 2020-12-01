@@ -1,18 +1,20 @@
 package eternal.fire;
 
-import javafx.application.Application;
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Logger;
 
-public class Parser extends Application {
+public class Parser {
+//    Logger logger = LoggerFactory
+    double start;
+    double end;
+    double step;
+    ExprNode horizontalT;
+    ExprNode verticalT;
+    GraphicsContext context;
     private Lexer lexer;
     private Token token;
     private double originX = 0;
@@ -20,29 +22,10 @@ public class Parser extends Application {
     private double scaleX = 1;
     private double scaleY = 1;
     private double rotAngle = 0;
-    double start;
-    double end;
-    double step;
-    ExprNode horizontalT;
-    ExprNode verticalT;
-    GraphicsContext context;
 
-    public Parser() throws IOException {
+    public Parser(GraphicsContext context) throws IOException {
         lexer = new Lexer();
-    }
-
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-        Group root = new Group();
-        Canvas canvas = new Canvas(500, 500);
-        context = canvas.getGraphicsContext2D();
-//        drawDot(context, 250, 250);
-        drawDots();
-        root.getChildren().add(canvas);
-        primaryStage.setTitle("Draw");
-        primaryStage.getIcons().add(new Image(Draw.class.getResourceAsStream("/draw.png")));
-        primaryStage.setScene(new Scene(root));
-        primaryStage.show();
+        this.context = context;
     }
 
     private void drawDot(double x, double y) {
@@ -71,7 +54,7 @@ public class Parser extends Application {
         return List.of(x, y);
     }
 
-    private void parse() {
+    public void parse() {
         fetchToken();
         program();
     }
@@ -148,17 +131,25 @@ public class Parser extends Application {
     private ExprNode expression() {
         var left = term();
         while (token.getTokenType() == TokenType.PLUS || token.getTokenType() == TokenType.MINUS) {
+            var tmp = token.getTokenType();
             matchToken(token.getTokenType());
             var right = term();
-            left = makeExprNode(token.getTokenType());
-
+            // 不断更新左节点
+            left = new ExprNode(tmp, left, right);
         }
         return left;
     }
 
     private ExprNode term() {
         ExprNode left = factor();
-
+        while (token.getTokenType() == TokenType.MUL || token.getTokenType() == TokenType.DIV) {
+            var tmp = token.getTokenType();
+            matchToken(token.getTokenType());
+            var right = factor();
+            // 不断更新左节点
+            left = new ExprNode(tmp, left, right);
+        }
+        return left;
     }
 
     private ExprNode factor() {
@@ -221,28 +212,6 @@ public class Parser extends Application {
             default -> throw new RuntimeException("Syntax Error");
         }
     }
-
-//    public ExprNode makeExprNode(TokenType tokenType) {
-//        switch (tokenType) {
-//            case CONST_VAL -> {
-//                return new ExprNode(tokenType, this.token.getTokenVal());
-//            }
-//            case T -> {
-//                return new ExprNode(tokenType);
-//            }
-//            case FUNC -> {
-//                return new ExprNode(tokenType, token.getTokenString());
-//            }
-//            case PLUS, MINUS, MUL, DIV ->{
-//                // Todo:
-//            }
-//            default -> throw new RuntimeException("Syntax Error");
-//        }
-//    }
-//
-//    public ExprNode makeExprNode(TokenType tokenType, ExprNode left, ExprNode right) {
-//
-//    }
 
     private double getExprVal(ExprNode exprNode) {
         switch (exprNode.getTokenType()) {

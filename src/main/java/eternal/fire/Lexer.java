@@ -35,6 +35,7 @@ public class Lexer {
         fileName = "src.txt";
         initTable();
         initSrc();
+        System.out.println("Lexer build complete");
     }
 
     /**
