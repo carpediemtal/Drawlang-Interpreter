@@ -60,6 +60,10 @@ public class Token {
         this.tokenVal = tokenVal;
     }
 
+    /**
+     * 格式化输出
+     * @return 格式化输出内容
+     */
     @Override
     public String toString() {
         return String.format("TokenType:%s;\tTokenString:%s;\tTokenVal:%.2f\t\n", tokenType, tokenString, tokenVal);
