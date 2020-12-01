@@ -1,4 +1,6 @@
 origin is (100, 300);
 rot is 0;
-scale is (1, 1);
-for T from 0 to 100 step 1 draw (T, -T);
+scale is (1, 2);
+for T from 0 to 100 step 1 draw (100*cos(T), 100*sin(T));
+scale is (2, 1);
+for T from 0 to 2*PI step PI/50 draw (20*cos(T), 20*sin(T));

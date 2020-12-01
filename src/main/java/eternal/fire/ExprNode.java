@@ -74,11 +74,6 @@ public class ExprNode {
         this.left = left;
     }
 
-    @Override
-    public String toString() {
-        return super.toString();
-    }
-
     public ExprNode getRight() {
         return right;
     }
@@ -93,5 +88,11 @@ public class ExprNode {
 
     public void setChild(ExprNode child) {
         this.child = child;
+    }
+
+    @Override
+    public String toString() {
+//        return String.format("tokenType:%s, val:%f, funcName:%s, left:%s, right:%s, child:%s", tokenType.toString(), val, funcName, left.toString(), right.toString(), child.toString());
+        return tokenType.toString() + val;
     }
 }

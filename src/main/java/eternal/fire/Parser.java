@@ -2,20 +2,21 @@ package eternal.fire;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Logger;
 
 public class Parser {
-//    Logger logger = LoggerFactory
-    double start;
-    double end;
-    double step;
-    ExprNode horizontalT;
-    ExprNode verticalT;
-    GraphicsContext context;
-    private Lexer lexer;
+    private final static Logger logger = LoggerFactory.getLogger(Parser.class);
+    private double start;
+    private double end;
+    private double step;
+    private ExprNode horizontalT;
+    private ExprNode verticalT;
+    private final GraphicsContext context;
+    private final Lexer lexer;
     private Token token;
     private double originX = 0;
     private double originY = 0;
@@ -26,20 +27,22 @@ public class Parser {
     public Parser(GraphicsContext context) throws IOException {
         lexer = new Lexer();
         this.context = context;
+        logger.info("Parser init done");
     }
 
     private void drawDot(double x, double y) {
         context.setFill(Color.GREEN);
         context.setLineWidth(5);
         context.fillOval(x, y, 5, 5);
+        logger.info("Draw dot:({},{})", x, y);
     }
 
     private void drawDots() {
-        for (int i = (int) start; i < end; i += step) {
-            var xVal = getExprVal(horizontalT);
-            var yVal = getExprVal(verticalT);
+        for (double i = start; i < end; i += step) {
+            var xVal = getExprVal(horizontalT, i);
+            var yVal = getExprVal(verticalT, i);
             var xy = calculateXY(xVal, yVal);
-            drawDot(xy.get(0), xy.get(1));
+            drawDot(xy.get(0) + originX, xy.get(1) + originY);
         }
     }
 
@@ -82,9 +85,12 @@ public class Parser {
         matchToken(TokenType.L_BRACKET);
         var syntaxTree = expression();
         originX = getExprVal(syntaxTree);
+        logger.info("Set originX:{}", originX);
+
         matchToken(TokenType.COMMA);
         syntaxTree = expression();
         originY = getExprVal(syntaxTree);
+        logger.info("Set originY:{}", originY);
         matchToken(TokenType.R_BRACKET);
     }
 
@@ -101,9 +107,12 @@ public class Parser {
         matchToken(TokenType.L_BRACKET);
         var syntaxTree = expression();
         scaleX = getExprVal(syntaxTree);
+        logger.info("Set scaleX:{}", scaleX);
+
         matchToken(TokenType.COMMA);
         syntaxTree = expression();
         scaleY = getExprVal(syntaxTree);
+        logger.info("Set scaleY:{}", scaleY);
         matchToken(TokenType.R_BRACKET);
     }
 
@@ -113,12 +122,18 @@ public class Parser {
         matchToken(TokenType.FROM);
         var syntaxTree = expression();
         start = getExprVal(syntaxTree);
+        logger.info("Set start:{}", start);
+
         matchToken(TokenType.TO);
         syntaxTree = expression();
         end = getExprVal(syntaxTree);
+        logger.info("Set end:{}", end);
+
         matchToken(TokenType.STEP);
         syntaxTree = expression();
         step = getExprVal(syntaxTree);
+        logger.info("Set step:{}", step);
+
         matchToken(TokenType.DRAW);
         matchToken(TokenType.L_BRACKET);
         horizontalT = expression();
@@ -187,8 +202,9 @@ public class Parser {
     private ExprNode atom() {
         switch (token.getTokenType()) {
             case CONST_VAL -> {
+                var tmp = token.getTokenVal();
                 matchToken(TokenType.CONST_VAL);
-                return new ExprNode(TokenType.CONST_VAL);
+                return new ExprNode(TokenType.CONST_VAL, tmp);
             }
             case T -> {
                 matchToken(TokenType.T);
@@ -236,7 +252,10 @@ public class Parser {
             case CONST_VAL -> {
                 return exprNode.getVal();
             }
-            default -> throw new RuntimeException("Syntax Error");
+            default -> {
+                logger.info(exprNode.toString());
+                throw new RuntimeException("Syntax Error");
+            }
         }
     }
 
@@ -244,22 +263,22 @@ public class Parser {
     private double getExprVal(ExprNode exprNode, double t) {
         switch (exprNode.getTokenType()) {
             case PLUS -> {
-                return getExprVal(exprNode.getLeft()) + getExprVal(exprNode.getRight());
+                return getExprVal(exprNode.getLeft(), t) + getExprVal(exprNode.getRight(), t);
             }
             case MINUS -> {
-                return getExprVal(exprNode.getLeft()) - getExprVal(exprNode.getRight());
+                return getExprVal(exprNode.getLeft(), t) - getExprVal(exprNode.getRight(), t);
             }
             case MUL -> {
-                return getExprVal(exprNode.getLeft()) * getExprVal(exprNode.getRight());
+                return getExprVal(exprNode.getLeft(), t) * getExprVal(exprNode.getRight(), t);
             }
             case DIV -> {
-                return getExprVal(exprNode.getLeft()) / getExprVal(exprNode.getRight());
+                return getExprVal(exprNode.getLeft(), t) / getExprVal(exprNode.getRight(), t);
             }
             case POWER -> {
-                return Math.pow(getExprVal(exprNode.getLeft()), getExprVal(exprNode.getRight()));
+                return Math.pow(getExprVal(exprNode.getLeft(), t), getExprVal(exprNode.getRight(), t));
             }
             case FUNC -> {
-                return function(exprNode.getFuncName(), getExprVal(exprNode.getChild()));
+                return function(exprNode.getFuncName(), getExprVal(exprNode.getChild(), t));
             }
             case CONST_VAL -> {
                 return exprNode.getVal();
@@ -297,6 +316,7 @@ public class Parser {
 
     private void fetchToken() {
         this.token = lexer.getToken();
+        logger.info("Fetch Token:{}", token.getTokenType());
         if (token.getTokenType() == TokenType.ERROR) {
             throw new RuntimeException("Syntax Error");
         }
