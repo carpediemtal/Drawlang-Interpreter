@@ -18,7 +18,7 @@ dependencies {
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
 // https://mvnrepository.com/artifact/ch.qos.logback/logback-core
     compile group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
-
+    compile 'com.jfoenix:jfoenix:9.0.10'
 }
 javafx {
     version = "13"

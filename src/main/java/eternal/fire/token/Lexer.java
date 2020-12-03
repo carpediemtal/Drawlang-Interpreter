@@ -1,10 +1,15 @@
-package eternal.fire;
+package eternal.fire.token;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Lexer {
+    private static final Logger logger = LoggerFactory.getLogger(Lexer.class);
+
     /**
      * 源代码文件名，如{@code src.txt}
      */
@@ -233,6 +238,7 @@ public class Lexer {
 
     /**
      * 初始化源代码{@code src}
+     *
      * @throws IOException 找不到文件
      */
     private void initSrc() throws IOException {
@@ -251,5 +257,9 @@ public class Lexer {
                 break;
             }
         }
+    }
+
+    public void reload() {
+        this.index = 0;
     }
 }

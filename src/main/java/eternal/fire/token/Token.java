@@ -1,4 +1,4 @@
-package eternal.fire;
+package eternal.fire.token;
 
 import java.util.Objects;
 

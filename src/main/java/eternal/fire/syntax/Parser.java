@@ -1,5 +1,8 @@
-package eternal.fire;
+package eternal.fire.syntax;
 
+import eternal.fire.token.Lexer;
+import eternal.fire.token.Token;
+import eternal.fire.token.TokenType;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import org.slf4j.Logger;
@@ -10,31 +13,90 @@ import java.util.List;
 
 public class Parser {
     private final static Logger logger = LoggerFactory.getLogger(Parser.class);
+
+    /**
+     * 像素点的大小
+     */
+    private double dotSize = 5;
+
+    public void setDotSize(double dotSize) {
+        this.dotSize = dotSize;
+    }
+
+    /**
+     * 原点偏移量
+     */
+    private double originX = 0;
+    private double originY = 0;
+
+    /**
+     * 缩放比例
+     */
+    private double scaleX = 1;
+    private double scaleY = 1;
+
+    /**
+     * 旋转角度
+     */
+    private double rotAngle = 0;
+
+    /**
+     * 绘图语句定义的循环的起始量
+     */
     private double start;
     private double end;
     private double step;
+
+    /**
+     * 要绘制的点的坐标（从语法树中计算得到的初始坐标）
+     */
     private ExprNode horizontalT;
     private ExprNode verticalT;
-    private final GraphicsContext context;
-    private final Lexer lexer;
-    private Token token;
-    private double originX = 0;
-    private double originY = 0;
-    private double scaleX = 1;
-    private double scaleY = 1;
-    private double rotAngle = 0;
 
+    private final GraphicsContext context;
+
+    /**
+     * 语法分析器内置的词法分析器
+     */
+    private final Lexer lexer;
+
+    public Lexer getLexer() {
+        return lexer;
+    }
+
+    /**
+     * 当前的Token
+     */
+    private Token token;
+
+    /**
+     * 语法分析器的构造函数
+     *
+     * @param context 绘图面板
+     * @throws IOException 找不到函数绘图语言的源代码
+     */
     public Parser(GraphicsContext context) throws IOException {
         lexer = new Lexer();
         this.context = context;
         logger.info("Parser init done");
     }
 
+    /**
+     * 语法分析器的构造函数（指定源代码文件名）
+     *
+     * @param context  绘图面板
+     * @param fileName 源代码文件名
+     * @throws IOException 找不到对应的文件
+     */
+    public Parser(GraphicsContext context, String fileName) throws IOException {
+        lexer = new Lexer(fileName);
+        this.context = context;
+        logger.info("Parser init done");
+    }
+
     private void drawDot(double x, double y) {
-        context.setFill(Color.GREEN);
-        context.setLineWidth(5);
-        context.fillOval(x, y, 5, 5);
-        logger.info("Draw dot:({},{})", x, y);
+        context.fillOval(x, y, dotSize, dotSize);
+        logger.info("Draw dot:({},{}), color:{}", x, y, context.getFill());
     }
 
     private void drawDots() {
@@ -42,10 +104,17 @@ public class Parser {
             var xVal = getExprVal(horizontalT, i);
             var yVal = getExprVal(verticalT, i);
             var xy = calculateXY(xVal, yVal);
-            drawDot(xy.get(0) + originX, xy.get(1) + originY);
+            drawDot(xy.get(0), xy.get(1));
         }
     }
 
+    /**
+     * 将原始坐标进行比例变换、旋转变换再加上原点偏移量得到新的坐标
+     *
+     * @param x 原始横坐标
+     * @param y 原始纵坐标
+     * @return 变换后的坐标
+     */
     private List<Double> calculateXY(double x, double y) {
         // 比例变换
         x *= scaleX;
@@ -54,7 +123,8 @@ public class Parser {
         double tmp = x * Math.cos(rotAngle) + y * Math.sin(rotAngle);
         y = y * Math.cos(rotAngle) - x * Math.sin(rotAngle);
         x = tmp;
-        return List.of(x, y);
+        // 加上原点偏移量
+        return List.of(x + originX, y + originY);
     }
 
     public void parse() {
@@ -69,6 +139,9 @@ public class Parser {
         }
     }
 
+    /**
+     * 解释statement
+     */
     private void statement() {
         switch (token.getTokenType()) {
             case ORIGIN -> originStatement();
@@ -79,6 +152,9 @@ public class Parser {
         }
     }
 
+    /**
+     * 解释originStatement
+     */
     private void originStatement() {
         matchToken(TokenType.ORIGIN);
         matchToken(TokenType.IS);
@@ -143,6 +219,11 @@ public class Parser {
         drawDots();
     }
 
+    /**
+     * 匹配一个表达式expression，为表达式expression构造语法树ExprNode
+     *
+     * @return 构造出的语法树
+     */
     private ExprNode expression() {
         var left = term();
         while (token.getTokenType() == TokenType.PLUS || token.getTokenType() == TokenType.MINUS) {
@@ -229,6 +310,12 @@ public class Parser {
         }
     }
 
+    /**
+     * 根据语法树，计算表达式的值（不考虑包含参数T的情况）
+     *
+     * @param exprNode 待计算的语法树
+     * @return 语法树所代表的表达式的值
+     */
     private double getExprVal(ExprNode exprNode) {
         switch (exprNode.getTokenType()) {
             case PLUS -> {
@@ -259,7 +346,13 @@ public class Parser {
         }
     }
 
-    // 只有draw后面的表达式包含T
+    /**
+     * 方法重载：根据语法树，计算表达式的值（考虑包含参数T的情况）
+     *
+     * @param exprNode 待计算的语法树
+     * @param t        参数T的值
+     * @return 语法树所代表的表达式的值
+     */
     private double getExprVal(ExprNode exprNode, double t) {
         switch (exprNode.getTokenType()) {
             case PLUS -> {
@@ -290,6 +383,13 @@ public class Parser {
         }
     }
 
+    /**
+     * 计算带有函数的表达式的值
+     *
+     * @param funcName 函数名
+     * @param val      函数
+     * @return 函数值
+     */
     private double function(String funcName, double val) {
         switch (funcName) {
             case "COS" -> {
@@ -314,6 +414,9 @@ public class Parser {
         }
     }
 
+    /**
+     * 调用词法分析器的getToken方法获得源代码中下一个Token
+     */
     private void fetchToken() {
         this.token = lexer.getToken();
         logger.info("Fetch Token:{}", token.getTokenType());
@@ -322,6 +425,11 @@ public class Parser {
         }
     }
 
+    /**
+     * 匹配一个Token，接着fetch一个Token
+     *
+     * @param tokenType 要匹配的Token的类型
+     */
     private void matchToken(TokenType tokenType) {
         if (token.getTokenType() != tokenType) {
             throw new RuntimeException("Syntax Error");

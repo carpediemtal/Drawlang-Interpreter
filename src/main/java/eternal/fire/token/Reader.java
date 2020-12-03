@@ -1,4 +1,4 @@
-package eternal.fire;
+package eternal.fire.token;
 
 import java.io.BufferedReader;
 import java.io.IOException;

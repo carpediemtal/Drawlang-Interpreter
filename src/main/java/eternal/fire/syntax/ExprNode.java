@@ -1,5 +1,11 @@
-package eternal.fire;
+package eternal.fire.syntax;
 
+import eternal.fire.token.TokenType;
+
+/**
+ * 当节点有两个孩子的时候，使用left和right
+ * 当节点只有一个孩子的时候，使用child
+ */
 public class ExprNode {
     private TokenType tokenType;
 
@@ -14,6 +20,29 @@ public class ExprNode {
 
     // 针对FUNC
     private String funcName;
+
+    // 针对FUNC类型的节点
+    public ExprNode(TokenType tokenType, String funcName) {
+        this.tokenType = tokenType;
+        this.funcName = funcName;
+    }
+
+    // CONST_VAL类型的节点
+    public ExprNode(TokenType tokenType, double val) {
+        this.tokenType = tokenType;
+        this.val = val;
+    }
+
+    // 针对二元运算类型的节点（已经构造好了左子树和右子树）
+    public ExprNode(TokenType tokenType, ExprNode left, ExprNode right) {
+        this.tokenType = tokenType;
+        this.left = left;
+        this.right = right;
+    }
+
+    public ExprNode() {
+
+    }
 
     public String getFuncName() {
         return funcName;
@@ -35,28 +64,6 @@ public class ExprNode {
         this.tokenType = tokenType;
     }
 
-    // 针对FUNC类型的节点
-    public ExprNode(TokenType tokenType, String funcName) {
-        this.tokenType = tokenType;
-        this.funcName = funcName;
-    }
-
-    // CONST_VAL类型的节点
-    public ExprNode(TokenType tokenType, double val) {
-        this.tokenType = tokenType;
-        this.val = val;
-    }
-
-    // 针对二元运算的节点
-    public ExprNode(TokenType tokenType, ExprNode left, ExprNode right) {
-        this.tokenType = tokenType;
-        this.left = left;
-        this.right = right;
-    }
-
-    public ExprNode() {
-
-    }
 
     public TokenType getTokenType() {
         return tokenType;
