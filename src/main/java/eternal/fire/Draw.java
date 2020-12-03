@@ -4,8 +4,6 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXSlider;
 import eternal.fire.syntax.Parser;
 import javafx.application.Application;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -55,6 +53,7 @@ public class Draw extends Application {
         // 拾色器
         ColorPicker colorPicker = new ColorPicker(Color.GREEN);
         colorPicker.setOnAction(event -> {
+            logger.info("画笔颜色改变为{}", colorPicker.getValue());
             context.clearRect(0, 0, 500, 500);
             context.setFill(colorPicker.getValue());
             parser.getLexer().reload();
@@ -65,6 +64,7 @@ public class Draw extends Application {
         JFXSlider slider = new JFXSlider(0, 10, 0.5);
         slider.setValue(5);
         slider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            logger.info("画笔宽度改变为{}", newValue.doubleValue());
             context.clearRect(0, 0, 500, 500);
             parser.setDotSize(newValue.doubleValue());
             parser.getLexer().reload();
