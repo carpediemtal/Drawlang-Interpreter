@@ -1,5 +1,5 @@
 # Drawlang-Interpreter
-[我的博客](https://linjinming.gitee.io/2020/11/24/%E5%87%BD%E6%95%B0%E7%BB%98%E5%9B%BE%E8%AF%AD%E8%A8%80%E4%B9%8B%E8%A7%A3%E9%87%8A%E5%99%A8/)
+详情请跳转[我的博客](https://linjinming.gitee.io/2020/11/24/%E5%87%BD%E6%95%B0%E7%BB%98%E5%9B%BE%E8%AF%AD%E8%A8%80%E4%B9%8B%E8%A7%A3%E9%87%8A%E5%99%A8/)
 
 ```
 origin is (100, 300);
@@ -30,4 +30,5 @@ for t from 0 to 2*pi step pi/50 draw (cos(t), sin(t));
 for t from 0 to pi*20 step Pi/50 draw ((1-1/(10/7))*cos(T)+1/(10/7)*cos(-T*(((10/7)-1))), (1-1/(10/7))*sin(T)+1/(10/7)*sin(-T*((10/7)-1)));
 ```
 ![Snipaste_2020-12-03_15-21-41.png](http://ww1.sinaimg.cn/large/005VT09Qly1glap1m307jj30i20euta2.jpg)
+
 To be continued...
